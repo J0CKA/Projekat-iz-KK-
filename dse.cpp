@@ -17,16 +17,18 @@ namespace {
 struct DSEPass : public PassInfoMixin<DSEPass> {
     PreservedAnalyses run(Function &F, FunctionAnalysisManager &) {
         bool promena = false;
-
+        
+        std::unordered_map<BasicBlock*, std::unordered_set<Value*>> ziveNaUlazu;
         std::unordered_map<BasicBlock*, std::unordered_set<Value*>> ziveNaIzlazu;
         
         std::vector<BasicBlock*> radnaLista;
         std::unordered_set<BasicBlock*> zaObradu;
 
-        for (auto BBIt = F.rbegin(); BBIt != F.rend(); ++BBIt) {
-            radnaLista.push_back(&*BBIt);
-            zaObradu.insert(&*BBIt);
+        for (BasicBlock &BB : llvm::reverse(F)) {
+            radnaLista.push_back(&BB);
+            zaObradu.insert(&BB);
         }
+        std::reverse(radnaLista.begin(), radnaLista.end());
 
         while (!radnaLista.empty()) {
             BasicBlock *BB = radnaLista.back();
@@ -34,16 +36,34 @@ struct DSEPass : public PassInfoMixin<DSEPass> {
             zaObradu.erase(BB);
 
             std::unordered_set<Value*> novoStanjeIzlaza;
-
             for (BasicBlock *suc : successors(BB)) {
-                auto It = ziveNaIzlazu.find(suc);
-                if (It != ziveNaIzlazu.end()) {
+                auto It = ziveNaUlazu.find(suc);
+                if (It != ziveNaUlazu.end()) {
                     novoStanjeIzlaza.insert(It->second.begin(), It->second.end());
                 }
             }
+            ziveNaIzlazu[BB] = novoStanjeIzlaza;
 
-            if (ziveNaIzlazu[BB] != novoStanjeIzlaza) {
-                ziveNaIzlazu[BB] = novoStanjeIzlaza;
+  
+            std::unordered_set<Value*> tekucaZivost = novoStanjeIzlaza;
+            for (auto I = BB->rbegin(); I != BB->rend(); ++I) {
+                Instruction &Inst = *I;
+
+                if (auto *LI = dyn_cast<LoadInst>(&Inst)) {
+                    tekucaZivost.insert(LI->getPointerOperand());
+                } 
+                else if (auto *SI = dyn_cast<StoreInst>(&Inst)) {
+                    tekucaZivost.erase(SI->getPointerOperand());
+                } 
+                else if (auto *CI = dyn_cast<CallInst>(&Inst)) {
+                    if (!CI->onlyReadsMemory()) {
+                        tekucaZivost.clear();
+                    }
+                }
+            }
+
+            if (ziveNaUlazu[BB] != tekucaZivost) {
+                ziveNaUlazu[BB] = tekucaZivost;
 
                 for (BasicBlock *pred : predecessors(BB)) {
                     if (zaObradu.find(pred) == zaObradu.end()) {
@@ -85,11 +105,11 @@ struct DSEPass : public PassInfoMixin<DSEPass> {
             }
 
             for (StoreInst *SI : zaBrisanje) {
-                errs() << "Uklanja instrukciju: " << *SI << "\n";
                 SI->eraseFromParent();
                 promena = true;
             }
         }
+
         return (promena ? PreservedAnalyses::none() : PreservedAnalyses::all());
     }
 };
