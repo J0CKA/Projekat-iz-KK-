@@ -1,8 +1,11 @@
-void beskorisno_grananije(int a, int b) {
+#include <stdio.h>
+
+void beskorisno_grananje(int a, int b) {
     int rezultat = 0;
 
     if (a > b) {
-        rezultat = a * b; //mrtav    }
+        rezultat = a * b; //mrtva
+    }
     
     printf("Funkcija je gotova.\n");
 }
