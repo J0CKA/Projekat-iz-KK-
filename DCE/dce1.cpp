@@ -128,6 +128,8 @@ namespace
         }
 
         //glavna ulazna tačka passa koja se izvršava nad svakom funkcijom u programu
+        //neefikasna -> ima prostora za optimizaciju
+        //sve dok ima mrtvih instrukcija ona ispituje ponovo kako bi uklonila i one korišćene, ali korišćene za mrtve
         bool runOnFunction(Function &F) override
         {
             do
