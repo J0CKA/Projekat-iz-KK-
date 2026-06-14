@@ -1,3 +1,4 @@
+//sve su žive
 #include <stdio.h>
 
 int primer(int n, int limit) {
@@ -5,16 +6,16 @@ int primer(int n, int limit) {
     int i = 0;
 
     while (i < n) {
-        sum = sum + 5;      // ŽIV UPIS! 
+        sum = sum + 5;
 
         if (sum > limit) {
-            sum = sum + 10; // ŽIV UPIS!
+            sum = sum + 10; 
         } else {
-            i = i + 1;      // ŽIV UPIS! 
+            i = i + 1;    
         }
 
-        i = i + 1;          // ŽIV UPIS! 
+        i = i + 1;        
     }
 
-    return sum;             // ŽIVO ČITANJE! 
+    return sum;         
 }
