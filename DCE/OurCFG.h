@@ -1,3 +1,4 @@
+//KLASNI INTERFEJS
 #ifndef LLVM_PROJECT_OURCFG_H
 #define LLVM_PROJECT_OURCFG_H
 
@@ -10,6 +11,7 @@
 
 using namespace llvm;
 
+//deklaracija privatnih i javnih funkcija
 class OurCFG {
 private:
   std::string FunctionName;
