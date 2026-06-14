@@ -4,9 +4,9 @@ volatile int sink;
 
 void napredni_test(int *p, int *q, int uslov)
 {
-    *p = 100;      // mrtav
+    *p = 100;      //mrtva
 
-    *q = 5;        // mora da ostane
+    *q = 5;        //živa
 
     if (uslov)
         sink = *q;
