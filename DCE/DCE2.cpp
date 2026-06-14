@@ -95,14 +95,15 @@ struct DCEPass : public PassInfoMixin<DCEPass> {
 // Ovo vraća informacije o plugin-u LLVM-u
 llvm::PassPluginLibraryInfo getDCEPluginInfo() {
     return {
-        LLVM_PLUGIN_API_VERSION,
+        //metapodaci
+        LLVM_PLUGIN_API_VERSION,    //verzija API-ja sa kojom je plugin napravljen
         "dce",                     // ime pass-a
-        LLVM_VERSION_STRING,
+        LLVM_VERSION_STRING,       //verzija llvm-a
 
         // registracija pipeline callback-a
         [](PassBuilder &PB) {
 
-            PB.registerPipelineParsingCallback(
+            PB.registerPipelineParsingCallback( //fja koja pass zvanično ubacuje u red za izvršavanje
                 [](StringRef Name,
                    FunctionPassManager &FPM,
                    ArrayRef<PassBuilder::PipelineElement>) {
