@@ -10,7 +10,7 @@ define dso_local i32 @main_test(i1 noundef zeroext %0) #0 {
   %4 = alloca i32, align 4
   %5 = zext i1 %0 to i8
   store i8 %5, ptr %2, align 1
-  store i32 5, ptr %3, align 4
+  store i32 5, ptr %3, align 4 ; !!!
   %6 = load i8, ptr %2, align 1
   %7 = trunc i8 %6 to i1
   br i1 %7, label %8, label %9
