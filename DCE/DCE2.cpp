@@ -23,7 +23,6 @@ struct DCEPass : public PassInfoMixin<DCEPass> {
 
         // 1. Uklanjanje nedostižnih basic blokova (dead blocks)
         if (removeUnreachableBlocks(F)) {
-            errs() << "Uklonjeni su nedostižni bazični blokovi.\n";
             promena = true;
         }
 
@@ -56,8 +55,6 @@ struct DCEPass : public PassInfoMixin<DCEPass> {
                 instrukcija->mayHaveSideEffects())
                 continue;
 
-            // debug ispis (šta brišemo)
-            errs() << "Brišemo mrtvu instrukciju: " << *instrukcija << "\n";
 
             // 5. Dodajemo zavisne instrukcije u worklist
             // (ako ova instrukcija koristi neke druge instrukcije)
