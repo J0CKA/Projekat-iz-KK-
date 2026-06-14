@@ -1,11 +1,7 @@
 #include <stdio.h>
 
-void beskorisno_grananje(int a, int b) {
-    int rezultat = 0;
-
-    if (a > b) {
-        rezultat = a * b; //mrtva
-    }
-    
-    printf("Funkcija je gotova.\n");
+int main() {
+    int a = 2 + 3;
+    int b = 5 + 6;   // DEAD CODE
+    return a;
 }
