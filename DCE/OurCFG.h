@@ -14,16 +14,16 @@ using namespace llvm;
 //deklaracija privatnih i javnih funkcija
 class OurCFG {
 private:
-  std::string FunctionName;
-  std::unordered_set<BasicBlock *>Visited;
-  std::unordered_map<BasicBlock *, std::vector<BasicBlock *>> AdjacencyList;
-  void CreateCFG(Function &F);
+  std::string FunctionName; //ime date fje
+  std::unordered_set<BasicBlock *>Visited;  //skup posećenih čvorova - BB
+  std::unordered_map<BasicBlock *, std::vector<BasicBlock *>> AdjacencyList; //mapa koja za svaki čvor-BB čuva skup naslednika
+  void CreateCFG(Function &F);  //fja koja konstruiše graf
   void DumpBasicBlock(BasicBlock *, raw_fd_stream &);
 public:
-  OurCFG(Function &F);
-  void DFS(BasicBlock *); 
-  bool isReachable(BasicBlock *); 
-  void DumpToFile();
+  OurCFG(Function &F); //konstruktor
+  void DFS(BasicBlock *);  //fja za DFS obilazak CFG
+  bool isReachable(BasicBlock *);  //fja za proveru da li se može stići do datog bloka
+  void DumpToFile(); //to .dot
 };
 
 #endif 
