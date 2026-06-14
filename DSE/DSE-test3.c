@@ -1,24 +1,19 @@
 #include <stdbool.h>
 
 int main_test(bool cond1, bool mode_cond2) {
-    // entry:
     int x;
-    x = 1; // DEAD STORE 
+    x = 1; //mrtva
 
     if (cond1) {
-        // bb1:
-        x = 2; // ALIVE 
+        x = 2; //živa
     } else {
-        // bb2:
-        x = 3; // ALIVE
+        x = 3; //živa
           
         if (mode_cond2) {
-            // bb3:
-            x = 4; // ALIVE 
+            x = 4; //živa 
         }
     }
 
-    // merge:
     int v = x; 
     return v;  
 }
