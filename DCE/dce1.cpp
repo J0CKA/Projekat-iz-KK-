@@ -99,7 +99,7 @@ namespace
                 Instr->eraseFromParent();
             }
         }
-        //funkcija koja pronalazi i briše bazne blokove do kojih ne stiže
+        //funkcija koja pronalazi i briše bazne blokove do kojih ne stiže NIKADA -> nisu deo CFG
         void eliminateUnreachableInstructions(Function &F)
         {
             std::vector<BasicBlock *> UnreachableBlocks;
