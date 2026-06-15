@@ -73,19 +73,21 @@ namespace
                     }
                 }
             }
-            //DRUGI PROLAZ
+            //DRUGI PROLAZ: Definitivno označavanje mrtvih instrukcija
             for (BasicBlock &BB : F)
             {
                 for (Instruction &I : BB)
                 {
                     if (isa<StoreInst>(&I)) //store instrukcije
                     {
+                        //memorijska lokacija operanda 1 je ostala mrtva -> nije se koristila
                         if (Variables.find(I.getOperand(1)) != Variables.end() && !Variables[I.getOperand(1)])
                         {
                             InstructionsToRemove.push_back(&I);
                         }
                     }
-                    else if (Variables.find(&I) != Variables.end() && !Variables[&I]) //instrukcije koje su ostale u mapi Variables ali im je vrednost false
+                    //instrukcije koje su ostale u mapi Variables ali im je vrednost false
+                    else if (Variables.find(&I) != Variables.end() && !Variables[&I]) 
                     {
                         InstructionsToRemove.push_back(&I);
                     }
