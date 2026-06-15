@@ -15,16 +15,6 @@ void OurCFG::CreateCFG(llvm::Function &F)
     for ( BasicBlock *Successor : successors(&BB)) {
         AdjacencyList[&BB].push_back(Successor); //dodaje naslednika
     }
-
-    //STARI NAČIN 
-//    for (auto &Instr : BB) {
-//      if ( BranchInst *BranchInstr = dyn_cast<BranchInst>(&Instr)) {
-//        AdjacencyList[&BB].push_back(BranchInstr->getSuccessor(0));
-//        if (BranchInstr->isConditional()) {
-//          AdjacencyList[&BB].push_back(BranchInstr->getSuccessor(1));
-//        }
-//      }
-//    }
   }
 }
 //rekurzivni obilazak grafa u dubinu počevši od zadatog bloka
