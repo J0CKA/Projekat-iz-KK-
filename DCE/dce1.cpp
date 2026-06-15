@@ -64,7 +64,7 @@ namespace
                     {
                         for (size_t i = 0; i < I.getNumOperands(); i++)
                         {
-                            //ako se operand nalazi u mapi, označavamo ga kao živog
+                            //ako se operand nalazi u mapi -> koriristi se -> označavamo ga kao živog
                             if (Variables.find(I.getOperand(i)) != Variables.end()) 
                             {
                                 handleOperand(I.getOperand(i)); 
