@@ -12,7 +12,7 @@
 using namespace llvm;
 
 //deklaracija privatnih i javnih funkcija
-class OurCFG {
+class OurCFG { //Control Flow Graph (Graf toka upravljanja)
 private:
   std::string FunctionName; //ime date fje
   std::unordered_set<BasicBlock *>Visited;  //skup posećenih čvorova - BB
