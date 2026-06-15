@@ -20,7 +20,7 @@ void OurCFG::CreateCFG(llvm::Function &F)
 //rekurzivni obilazak grafa u dubinu počevši od zadatog bloka
 void OurCFG::DFS(llvm::BasicBlock *CurrentBlock)
 {
-  Visited.insert(CurrentBlock); //trenutni blok označava kao posećen ubacivanjem u kup
+  Visited.insert(CurrentBlock); //trenutni blok označava kao posećen ubacivanjem u skup 
 
   for (BasicBlock *Successor : AdjacencyList[CurrentBlock]) {
     if (Visited.find(Successor) == Visited.end()) { //ako naslednik još uvek nije posećen, rekurzivno pokreće DFS za njega
