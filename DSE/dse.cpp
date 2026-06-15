@@ -40,37 +40,39 @@ struct DSEPass : public PassInfoMixin<DSEPass> { //definicija DSE optimizacionog
             radnaLista.pop_back();  //skida ga sa liste
             zaObradu.erase(BB);  //brise ga i iz skupa
 
+            //računa one koje žive na izlazu datog BB prroveravajući koje žive na ulazu svih naslednika datog BB
             std::unordered_set<Value*> novoStanjeIzlaza;
             for (BasicBlock *suc : successors(BB)) { //daje sve BB koji se izvrsavaju nakon datog
-                auto It = ziveNaUlazu.find(suc);
-                if (It != ziveNaUlazu.end()) {
+                auto It = ziveNaUlazu.find(suc); //skup svih koje žive na ulazu naslednika trenutnog BB
+                if (It != ziveNaUlazu.end()) {  //ako je potrebna nasledniku -> ziva je
                     novoStanjeIzlaza.insert(It->second.begin(), It->second.end());
                 }
             }
-            ziveNaIzlazu[BB] = novoStanjeIzlaza; //od skupa živih na izlazu računa žive na ulazu
+            ziveNaIzlazu[BB] = novoStanjeIzlaza; //smešta ih u ziveNaIzlazu
 
-  
-            std::unordered_set<Value*> tekucaZivost = novoStanjeIzlaza; //novo stanje izlaza
-            for (auto I = BB->rbegin(); I != BB->rend(); ++I) {
+            //na osnovu onih koje žive na izlazu datog BB, formira se skup onih koji žive na ulazu datog bloka
+            std::unordered_set<Value*> tekucaZivost = novoStanjeIzlaza;
+            for (auto I = BB->rbegin(); I != BB->rend(); ++I) {  //krećemo se unazad
                 Instruction &Inst = *I; //uzima svaku instrukciju
 
-                if (auto *LI = dyn_cast<LoadInst>(&Inst)) { //ako je instrukcija load - živa je pa je dodaje u skup živih 
+                if (auto *LI = dyn_cast<LoadInst>(&Inst)) { //ako je instrukcija load - koristi se pa je dodaje u skup živih 
                     tekucaZivost.insert(LI->getPointerOperand());
                 } 
-                else if (auto *SI = dyn_cast<StoreInst>(&Inst)) {//ako je instrukcija store - lokacija se definiše pa više nije živa pre ovog upisa
+                else if (auto *SI = dyn_cast<StoreInst>(&Inst)) {//ako je instrukcija store - lokacija se definiše pa više nije živa PRE ovog upisa
                     tekucaZivost.erase(SI->getPointerOperand());
                 } 
                 else if (auto *CI = dyn_cast<CallInst>(&Inst)) {//ako je instrukcija poziv funkcije
-                    if (!CI->onlyReadsMemory()) {//ako funkcija menja memoriju - pretpostavljamo da prepisuje sve lokacije (ubija njihovu živost unazad)
-                        tekucaZivost.clear(); 
+                    if (!CI->onlyReadsMemory()) {//ako funkcija menja memoriju
+                        tekucaZivost.clear(); //pretpostavljamo da prepisuje sve lokacije (ubija njihovu živost unazad)
                     }
                 }
             }
 
-            if (ziveNaUlazu[BB] != tekucaZivost) { // Ako se skup živih promenio, analiza mora da se nastavi
+            if (ziveNaUlazu[BB] != tekucaZivost) { //ako se skup živih promenio to utiče i na njegove prethodnike
                 ziveNaUlazu[BB] = tekucaZivost;
 
-                for (BasicBlock *pred : predecessors(BB)) { //dodaje prethodnike radi ponovne obrade
+                //vraća se na prethodnike radi ponovne obrade
+                for (BasicBlock *pred : predecessors(BB)) { 
                     if (zaObradu.find(pred) == zaObradu.end()) {
                         radnaLista.push_back(pred);
                         zaObradu.insert(pred);
@@ -123,7 +125,7 @@ struct DSEPass : public PassInfoMixin<DSEPass> { //definicija DSE optimizacionog
 //informacije potrebne za registraciju plugina
 llvm::PassPluginLibraryInfo getDSEPluginInfo() {
     return {
-        LLVM_PLUGIN_API_VERSION, "dse", LLVM_VERSION_STRING,
+        LLVM_PLUGIN_API_VERSION, "dse", LLVM_VERSION_STRING, //metapodaci
         [](PassBuilder &PB) {
             PB.registerPipelineParsingCallback( //registruje pass pod imenom dse
                 [](StringRef Name, FunctionPassManager &FPM,
