@@ -1,8 +1,13 @@
+/* Svrha koda:
+    1) uklanjanje mrtvih instrukcija
+    2) uklanjanje nedostižnih blokova
+*/
 #include "llvm/Pass.h"
 #include "llvm/IR/Operator.h"
 #include "llvm/IR/Instruction.h"
 #include "llvm/IR/Instructions.h"
 #include "llvm/IR/Function.h"
+
 #include "OurCFG.h"
 
 using namespace llvm;
@@ -10,11 +15,11 @@ using namespace llvm;
 namespace
 {
     // definicija starog LLVM passa koji radi nad pojedinačnim funkcijama
-    struct OurDeadCodeElimination : public FunctionPass
+    struct OurDeadCodeElimination : public FunctionPass //struktura koja nasleđuje FunctionPass - optimizacija za svaku funkciju se poziva zasebno
     {
         // mapa koja prati da li je neka instrukcija živa - true, mrtva - false
         std::unordered_map<Value *, bool> Variables;
-        // mapa koja povezuje LoadInst sa memorijskom lokacijom (pokazivačem) sa koje čita
+        // lokacija gde promenljiva živi i lokacija gde njena vrednost živi
         std::unordered_map<Value *, Value *> VariablesMap;
 
         std::vector<Instruction *> InstructionsToRemove; // instrukcije označene za brisanje
@@ -39,7 +44,7 @@ namespace
             {
                 for (Instruction &I : BB) //prolazak kroz sve instrukcije
                 {
-                    if (I.getType()->getTypeID() != Type::VoidTyID && !isa<CallInst>(&I)) //ako instrukcija vraća vrednost (nije Void) i nije poziv funkcije - pretpostavljamo da je MRTVA (false)
+                    if (I.getType()->getTypeID() != Type::VoidTyID && !isa<CallInst>(&I)) //ako instrukcija: nije void i nije poziv funkcije -> pretpostavljamo da je mrtva
                     {
                         Variables[&I] = false;
                     }
@@ -55,7 +60,7 @@ namespace
                             handleOperand(I.getOperand(0)); 
                         }
                     }
-                    else //ya sve ostale instrukcije prolazimo kroz sve njihove operande
+                    else //za sve ostale instrukcije prolazimo kroz sve njihove operande
                     {
                         for (size_t i = 0; i < I.getNumOperands(); i++)
                         {
@@ -68,19 +73,19 @@ namespace
                     }
                 }
             }
-            //DRUGI PROLAZ: Selektovanje instrukcija za brisanje na osnovu sakupljenih informacija o živosti
+            //DRUGI PROLAZ
             for (BasicBlock &BB : F)
             {
                 for (Instruction &I : BB)
                 {
-                    if (isa<StoreInst>(&I))
+                    if (isa<StoreInst>(&I)) //store instrukcije
                     {
                         if (Variables.find(I.getOperand(1)) != Variables.end() && !Variables[I.getOperand(1)])
                         {
                             InstructionsToRemove.push_back(&I);
                         }
                     }
-                    else if (Variables.find(&I) != Variables.end() && !Variables[&I])
+                    else if (Variables.find(&I) != Variables.end() && !Variables[&I]) //instrukcije koje su ostale u mapi Variables ali im je vrednost false
                     {
                         InstructionsToRemove.push_back(&I);
                     }
@@ -108,7 +113,7 @@ namespace
 
             for (BasicBlock &BB : F)
             {
-                if (!CFG->isReachable(&BB))
+                if (!CFG->isReachable(&BB)) //proverava da li je trenutni blok dostižan
                 {
                     UnreachableBlocks.push_back(&BB);
                 }
@@ -119,8 +124,8 @@ namespace
             {
                 InstructionEliminated = true;
             }
+            
             //brisanje nedostižnih blokova
-
             for (BasicBlock *UnreachableBlock : UnreachableBlocks)
             {
                 UnreachableBlock->eraseFromParent();
@@ -128,10 +133,10 @@ namespace
         }
 
         //glavna ulazna tačka passa koja se izvršava nad svakom funkcijom u programu
-        //neefikasna -> ima prostora za optimizaciju
-        //sve dok ima mrtvih instrukcija ona ispituje ponovo kako bi uklonila i one korišćene, ali korišćene za mrtve
         bool runOnFunction(Function &F) override
         {
+            //do-while petlja koja sve dok ima mrtvih instrukcija ona ispituje ponovo
+            //neefikasna -> ima prostora za optimizaciju
             do
             {
                 InstructionEliminated = false;
@@ -143,6 +148,7 @@ namespace
     };
 }
 
-char OurDeadCodeElimination::ID = 0; //inicijalizacija ID-ja passa
+char OurDeadCodeElimination::ID = 0; //inicijalizacija ID passa
+
 //registracija passa kod LLVM-a kako bi mogao da se pozove preko 'opt'
 static RegisterPass<OurDeadCodeElimination> X("our-constant-folding", "OurDeadCodeElimination pass", false, false);
